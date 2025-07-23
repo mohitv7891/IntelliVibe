@@ -87,7 +87,7 @@ const PostJobForm = ({ onJobPosted }) => {
 
             console.log("Sending data to create job:", postData);
 
-            const { data } = await axios.post('http://localhost:5001/api/jobs', postData, config);
+            const { data } = await axios.post('/api/jobs', postData, config);
             
             onJobPosted(data);
             form.reset();
@@ -121,7 +121,7 @@ const PostJobForm = ({ onJobPosted }) => {
                 skills: values.skills.split(',').map(skill => skill.trim()).filter(skill => skill.length > 0),
                 location: values.location,
             };
-            const { data } = await axios.post('http://localhost:5001/api/ai/generate-job-description', payload, userInfo?.token ? { headers: { Authorization: `Bearer ${userInfo.token}` } } : {});
+            const { data } = await axios.post('/api/ai/generate-job-description', payload, userInfo?.token ? { headers: { Authorization: `Bearer ${userInfo.token}` } } : {});
             if (data && data.description) {
                 form.setValue('description', data.description, { shouldValidate: true });
             } else {

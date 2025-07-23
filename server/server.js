@@ -7,7 +7,7 @@ require('dotenv').config();
 const connectDB = require('./config/db');
 const Application = require('./models/Application')
 const Job = require('./models/Job');
-const jobRoutes = require('./routes/jobRoutes');
+const jobRoutes = require('./routes/JobRoutes');
 const applicationRoutes = require('./routes/applicationRoutes');
 const authRoutes = require('./routes/authRoutes');
 const reportRoutes = require('./routes/reportRoutes');
@@ -21,6 +21,8 @@ const { startStreamingRecognize } = require('./services/googleSpeechService');
 const session = require('express-session');
 const passport = require('./config/passport');
 const googleAuthRoutes = require('./routes/googleAuthRoutes');
+require('./utils/ensureUploadsDir');// if upload folder does not exit.
+
 // Initialize Express App
 
 

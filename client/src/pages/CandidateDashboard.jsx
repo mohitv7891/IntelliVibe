@@ -71,7 +71,7 @@ const CandidateDashboard = () => {
         setIsLoading(true);
         try {
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-            const { data } = await axios.get('http://localhost:5001/api/applications/my-applications', config);
+            const { data } = await axios.get('/api/applications/my-applications', config);
             
             setApplications(data);
             

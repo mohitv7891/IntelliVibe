@@ -60,7 +60,7 @@ const Jobs = () => {
     useEffect(() => {
         const fetchJobs = async () => {
             try {
-                const { data } = await axios.get('http://localhost:5001/api/jobs');
+                const { data } = await axios.get('/api/jobs');
                 setJobs(data);
             } catch (error) {
                 console.error("Failed to fetch jobs:", error);
@@ -103,7 +103,7 @@ const Jobs = () => {
                     ...(userInfo?.token ? { Authorization: `Bearer ${userInfo.token}` } : {})
                 }
             };
-            const { data } = await axios.post('http://localhost:5001/api/applications', formData, config);
+            const { data } = await axios.post('/api/applications', formData, config);
             setApplySuccess(data.message || 'Application submitted!');
             form.reset();
             // Redirect to My Applications if success

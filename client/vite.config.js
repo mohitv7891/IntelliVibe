@@ -9,4 +9,10 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+	  server: {
+    allowedHosts: ['intellivibe.redirectme.net'],
+    // If you are running the dev server on your GCP instance,
+    // you might also need to make it listen on all network interfaces.
+    host: '0.0.0.0'
+  }
 })

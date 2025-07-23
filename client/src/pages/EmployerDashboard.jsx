@@ -22,7 +22,7 @@ const EmployerDashboard = () => {
             try {
                 const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
                 // Fetching newest jobs first
-                const { data } = await axios.get('http://localhost:5001/api/jobs/myjobs', config);
+                const { data } = await axios.get('/api/jobs/myjobs', config);
                 setJobs(data);
             } catch (error) {
                 console.error("Failed to fetch jobs:", error);

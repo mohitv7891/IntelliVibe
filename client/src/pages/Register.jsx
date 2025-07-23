@@ -82,7 +82,7 @@ const Register = () => {
         setIsLoading(true);
         setApiError(null);
         try {
-            const { data } = await axios.post('http://localhost:5001/api/auth/register', values);
+            const { data } = await axios.post('/api/auth/register', values);
             
             // On success, save user info and redirect
             localStorage.setItem('userInfo', JSON.stringify(data));

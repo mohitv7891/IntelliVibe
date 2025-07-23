@@ -42,7 +42,7 @@ const ApplicantsPage = () => {
         setIsLoading(true);
         try {
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-            const { data } = await axios.get(`http://localhost:5001/api/applications/job/${jobId}`, config);
+            const { data } = await axios.get(`/api/applications/job/${jobId}`, config);
             
             // Handle both old and new response formats
             if (Array.isArray(data)) {
@@ -70,7 +70,7 @@ const ApplicantsPage = () => {
         try {
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
             await axios.put(
-                `http://localhost:5001/api/applications/${applicationId}/status`, 
+                `/api/applications/${applicationId}/status`, 
                 { status: newStatus },
                 config
             );
@@ -92,7 +92,7 @@ const ApplicantsPage = () => {
         try {
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
             const { data } = await axios.put(
-                'http://localhost:5001/api/applications/bulk-update',
+                '/api/applications/bulk-update',
                 { 
                     applicationIds: selectedApplicants, 
                     status: status,
@@ -470,7 +470,7 @@ const ApplicantsPage = () => {
                                                 )}
                                                 <Button asChild variant="ghost" size="sm">
                                                     <a 
-                                                        href={`http://localhost:5001/${app.resumeUrl}`} 
+                                                        href={`/${app.resumeUrl}`} 
                                                         target="_blank" 
                                                         rel="noopener noreferrer"
                                                     >
