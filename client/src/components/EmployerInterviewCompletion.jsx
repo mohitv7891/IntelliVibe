@@ -29,7 +29,7 @@ const EmployerInterviewCompletion = ({ application, onCompleted }) => {
         try {
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
             const response = await axios.post(
-                `http://localhost:5001/api/applications/${application._id}/complete-employer-interview`,
+                `/api/applications/${application._id}/complete-employer-interview`,
                 formData,
                 config
             );

@@ -97,7 +97,7 @@ const QuizPage = () => {
         try {
             const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
             const { data } = await axios.get(
-                `http://localhost:5001/api/applications/${applicationId}/quiz`,
+                `/api/applications/${applicationId}/quiz`,
                 config
             );
             
@@ -154,7 +154,7 @@ const QuizPage = () => {
             }));
 
             const { data } = await axios.post(
-                `http://localhost:5001/api/applications/${applicationId}/quiz/submit`,
+                `/api/applications/${applicationId}/quiz/submit`,
                 { answers: formattedAnswers, auto },
                 config
             );
