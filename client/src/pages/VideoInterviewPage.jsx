@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, Component } from 'react';
 import { useParams } from 'react-router-dom';
+import { useMediaCleanup } from '../hooks/useMediaCleanup';
 import io from 'socket.io-client';
 import { 
     Video, 
@@ -427,6 +428,26 @@ const VideoInterviewPage = () => {
     const localStreamRef = useRef(null);
     const supportedMimeType = useRef(null);
 
+    // Use media cleanup hook
+    useMediaCleanup(localStreamRef, 'VideoInterviewPage');
+
+    // ---- EFFECT to prevent navigation during interview ----
+    useEffect(() => {
+        const handleBeforeUnload = (event) => {
+            if (interviewState === 'Interviewing') {
+                event.preventDefault();
+                // Most browsers show a generic message, but this is for older ones
+                event.returnValue = 'You have an interview in progress. Are you sure you want to leave?';
+            }
+        };
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [interviewState]);
+
     // ---- EFFECT 1: Initialize Camera and check for MIME type support ----
     useEffect(() => {
         async function setup() {
@@ -534,7 +555,13 @@ const VideoInterviewPage = () => {
         return () => {
             console.log('[Cleanup] Component unmounting. Disconnecting socket and stopping media.');
             if (socket) socket.disconnect();
-            if (localStreamRef.current) localStreamRef.current.getTracks().forEach(track => track.stop());
+            if (localStreamRef.current) {
+                localStreamRef.current.getTracks().forEach(track => {
+                    console.log(`[Cleanup] Stopping track: ${track.kind}`);
+                    track.stop();
+                });
+                localStreamRef.current = null;
+            }
             stopRecording();
             // --- TTS: Stop any ongoing speech on unmount ---
             if (window.speechSynthesis) {

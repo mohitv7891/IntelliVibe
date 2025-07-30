@@ -7,7 +7,31 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // Use a specific model optimized for this kind of task
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+const getModel = (fallback = false) => {
+  const modelName = fallback ? "gemini-1.5-flash" : "gemini-1.5-flash-latest";
+  return genAI.getGenerativeModel({ model: modelName });
+};
+
+/**
+ * Retry function for handling temporary API failures
+ */
+const retryWithBackoff = async (fn, maxRetries = 3, baseDelay = 1000) => {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      const isRetryableError = error.status === 503 || error.status === 429 || error.message?.includes('overloaded');
+      
+      if (attempt === maxRetries || !isRetryableError) {
+        throw error;
+      }
+      
+      const delay = baseDelay * Math.pow(2, attempt - 1);
+      console.log(`Attempt ${attempt} failed, retrying in ${delay}ms...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+};
 
 /**
  * Generates the first question for the video interview.
@@ -39,10 +63,22 @@ const generateInitialQuestion = async (jobDetails, resumeText) => {
   `;
 
   try {
-    const result = await model.generateContent(prompt);
+    const model = getModel();
+    const result = await retryWithBackoff(async () => {
+      return await model.generateContent(prompt);
+    });
     const response = result.response;
     return response.text();
   } catch (error) {
+    // Try fallback model if main model fails
+    try {
+      console.log('Main model failed, trying fallback model...');
+      const fallbackModel = getModel(true);
+      const result = await fallbackModel.generateContent(prompt);
+      return result.response.text();
+    } catch (fallbackError) {
+      console.error("Both models failed:", fallbackError);
+    }
     console.error("CRITICAL: Error generating initial question with Gemini.", {
         errorMessage: error.message,
         errorDetails: error.details,
@@ -92,7 +128,9 @@ const generateFollowUpQuestion = async (transcriptHistory, jobDetails) => {
     `;
     
     try {
-        const result = await model.generateContent(prompt);
+        const result = await retryWithBackoff(async () => {
+            return await model.generateContent(prompt);
+        });
         return result.response.text();
     } catch (error) {
         console.error("Error generating follow-up question:", error);
@@ -119,7 +157,9 @@ const analyzeInterviewTranscript = async (transcript, jobDetails) => {
     `;
 
     try {
-        const result = await model.generateContent(prompt);
+        const result = await retryWithBackoff(async () => {
+            return await model.generateContent(prompt);
+        });
         const responseText = result.response.text().trim();
         // Extract the JSON part from the response
         const jsonMatch = responseText.match(/\{[\s\S]*\}/);

@@ -4,10 +4,48 @@ require('dotenv').config();
 // Initialize the Google Generative AI client
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
+/**
+ * Retry function with multiple model fallbacks for handling API failures
+ */
+const retryWithBackoff = async (fn, maxRetries = 3, baseDelay = 2000) => {
+  const models = ["gemini-1.5-flash-latest", "gemini-1.5-flash", "gemini-1.5-pro"];
+  
+  for (let modelIndex = 0; modelIndex < models.length; modelIndex++) {
+    const modelName = models[modelIndex];
+    console.log(`Trying model: ${modelName}`);
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        return await fn(modelName);
+      } catch (error) {
+        const isRetryableError = error.status === 503 || error.status === 429 || 
+                                 error.message?.includes('overloaded') || 
+                                 error.message?.includes('unavailable');
+        
+        if (attempt === maxRetries) {
+          if (modelIndex === models.length - 1) {
+            throw error; // All models and retries exhausted
+          }
+          console.log(`Model ${modelName} failed after ${maxRetries} attempts, trying next model...`);
+          break; // Try next model
+        }
+        
+        if (!isRetryableError) {
+          throw error;
+        }
+        
+        const delay = baseDelay * Math.pow(2, attempt - 1) + Math.random() * 1000; // Add jitter
+        console.log(`Attempt ${attempt} with ${modelName} failed, retrying in ${Math.round(delay)}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+};
+
 // Helper function to get the Gemini model configured for JSON output
-const getJsonModel = () => {
+const getJsonModel = (modelName = "gemini-1.5-flash-latest") => {
   return genAI.getGenerativeModel({
-    model: "gemini-1.5-flash-latest", 
+    model: modelName, 
     generationConfig: {
       response_mime_type: "application/json",
     },
@@ -15,9 +53,9 @@ const getJsonModel = () => {
 };
 
 // Helper function to get the Gemini model configured for plain text output
-const getTextModel = () => {
+const getTextModel = (modelName = "gemini-1.5-flash-latest") => {
   return genAI.getGenerativeModel({
-    model: "gemini-1.5-flash-latest",
+    model: modelName,
     generationConfig: {
       response_mime_type: "text/plain",
     },
@@ -31,7 +69,6 @@ const getTextModel = () => {
    // Making the prompt more explicit to ask for an integer.
    const analyzeResume = async (resumeText, jobDetails) => {
     try {
-        const model = getJsonModel();
         const prompt = `As an expert recruitment AI assistant, analyze the provided resume against the job requirements.
 
 Your response MUST be a valid JSON object with the following structure:
@@ -74,7 +111,10 @@ ${resumeText}`;
             resumeLength: resumeText.length
         });
 
-        const result = await model.generateContent(prompt);
+        const result = await retryWithBackoff(async (modelName) => {
+            const model = getJsonModel(modelName);
+            return await model.generateContent(prompt);
+        });
         const responseText = result.response.text();
         
         console.log('Raw AI response:', responseText);
@@ -117,12 +157,28 @@ ${resumeText}`;
             throw new Error('Failed to analyze resume: The content was blocked for safety reasons.');
         }
         
-        // Return a default result if AI fails
+        // Enhanced fallback - basic keyword matching when AI fails
+        const resumeLower = resumeText.toLowerCase();
+        const jobSkills = jobDetails.skills || [];
+        const matchedSkills = jobSkills.filter(skill => 
+            resumeLower.includes(skill.toLowerCase())
+        );
+        const missingSkills = jobSkills.filter(skill => 
+            !resumeLower.includes(skill.toLowerCase())
+        );
+        
+        // Calculate basic score based on keyword matching
+        const basicScore = jobSkills.length > 0 
+            ? Math.round((matchedSkills.length / jobSkills.length) * 100)
+            : 65; // Default passing score when no skills specified
+        
+        console.log(`Fallback analysis: ${matchedSkills.length}/${jobSkills.length} skills matched, score: ${basicScore}`);
+        
         return {
-            matchScore: 50,
-            justification: "AI analysis was unavailable. Please review manually.",
-            matchedSkills: [],
-            missingSkills: jobDetails.skills || []
+            matchScore: Math.max(basicScore, 45), // Minimum 45% to avoid too harsh rejection
+            justification: `Basic keyword analysis found ${matchedSkills.length} of ${jobSkills.length} required skills in your resume. AI analysis was temporarily unavailable.`,
+            matchedSkills: matchedSkills,
+            missingSkills: missingSkills
         };
     }
 };
@@ -135,7 +191,6 @@ ${resumeText}`;
  */
 const generateQuizQuestions = async (jobDetails, quizConfig) => {
   try {
-    const model = getJsonModel();
 
     // Calculate the total number of questions from the difficulty distribution
     const totalQuestions = quizConfig.difficultyDistribution.easy + 
@@ -166,7 +221,10 @@ Job Title: ${jobDetails.title}
 Required Skills: ${jobDetails.skills?.join(', ') || 'Not specified'}
 Description: ${jobDetails.description}`;
 
-    const result = await model.generateContent(prompt);
+    const result = await retryWithBackoff(async (modelName) => {
+      const model = getJsonModel(modelName);
+      return await model.generateContent(prompt);
+    });
     const responseText = result.response.text();
     const questions = JSON.parse(responseText);
 
@@ -190,9 +248,11 @@ Description: ${jobDetails.description}`;
  */
 const generateJobDescription = async (jobDetails) => {
   try {
-    const model = getTextModel();
     const prompt = `You are an expert HR assistant. Write a compelling, clear, and attractive job description for the following job posting. Use a professional tone, highlight the company, required skills, and location. The description should be a single, well-written paragraph of at least 100 words. Do NOT return JSON or any structured data, just the paragraph text.\n\nJob Title: ${jobDetails.title}\nCompany: ${jobDetails.companyName}\nSkills: ${jobDetails.skills}\nLocation: ${jobDetails.location}\n`;
-    const result = await model.generateContent(prompt);
+    const result = await retryWithBackoff(async (modelName) => {
+      const model = getTextModel(modelName);
+      return await model.generateContent(prompt);
+    });
     const responseText = result.response.text();
     return responseText;
   } catch (error) {
