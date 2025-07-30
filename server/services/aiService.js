@@ -7,38 +7,15 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 /**
  * Retry function with multiple model fallbacks for handling API failures
  */
-const retryWithBackoff = async (fn, maxRetries = 3, baseDelay = 2000) => {
-  const models = ["gemini-1.5-flash-latest", "gemini-1.5-flash", "gemini-1.5-pro"];
+const retryWithBackoff = async (fn) => {
+  const modelName = "gemini-1.5-flash-latest";
+  console.log(`Trying model: ${modelName}`);
   
-  for (let modelIndex = 0; modelIndex < models.length; modelIndex++) {
-    const modelName = models[modelIndex];
-    console.log(`Trying model: ${modelName}`);
-    
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
-        return await fn(modelName);
-      } catch (error) {
-        const isRetryableError = error.status === 503 || error.status === 429 || 
-                                 error.message?.includes('overloaded') || 
-                                 error.message?.includes('unavailable');
-        
-        if (attempt === maxRetries) {
-          if (modelIndex === models.length - 1) {
-            throw error; // All models and retries exhausted
-          }
-          console.log(`Model ${modelName} failed after ${maxRetries} attempts, trying next model...`);
-          break; // Try next model
-        }
-        
-        if (!isRetryableError) {
-          throw error;
-        }
-        
-        const delay = baseDelay * Math.pow(2, attempt - 1) + Math.random() * 1000; // Add jitter
-        console.log(`Attempt ${attempt} with ${modelName} failed, retrying in ${Math.round(delay)}ms...`);
-        await new Promise(resolve => setTimeout(resolve, delay));
-      }
-    }
+  try {
+    return await fn(modelName);
+  } catch (error) {
+    console.log(`Model ${modelName} failed:`, error.message);
+    throw error;
   }
 };
 
