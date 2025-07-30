@@ -463,7 +463,7 @@ const VideoInterviewPage = () => {
 
     // ---- EFFECT 2: Manage Socket.IO Connection ----
     useEffect(() => {
-        const serverUrl = 'http://localhost:5001';
+        const serverUrl = window.location.origin;
         socketRef.current = io(serverUrl);
         const socket = socketRef.current;
 
