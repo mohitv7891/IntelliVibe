@@ -128,6 +128,7 @@ const generateFollowUpQuestion = async (transcriptHistory, jobDetails) => {
     `;
     
     try {
+        const model = getModel();
         const result = await retryWithBackoff(async () => {
             return await model.generateContent(prompt);
         });
@@ -149,7 +150,7 @@ const analyzeInterviewTranscript = async (transcript, jobDetails) => {
         --- END TRANSCRIPT ---
 
         Please provide a structured JSON response with the following fields:
-        1.  "score": An integer between 0 and 100, representing how well the candidate's answers align with the job requirements. A score above 75 indicates a strong candidate.
+        1.  "score": An integer between 0 and 100, representing how well the candidate's answers align with the job requirements.
         2.  "summary": A brief, neutral summary of the interview, highlighting the key points discussed.
         3.  "status": A string, either "AI Interview Passed" or "AI Interview Failed", based on the score.
 
@@ -157,6 +158,7 @@ const analyzeInterviewTranscript = async (transcript, jobDetails) => {
     `;
 
     try {
+        const model = getModel();
         const result = await retryWithBackoff(async () => {
             return await model.generateContent(prompt);
         });

@@ -183,7 +183,9 @@ const handleNextQuestion = async () => {
   }
 
   // FIX: Pass both transcriptHistory AND jobDetails to generateFollowUpQuestion
+  console.log("debug: "+ state.fullTranscript);
   const nextQuestion = await generateFollowUpQuestion(state.fullTranscript, state.jobDetails);
+  console.log("next qn : "+ nextQuestion);
   setInterviewState({
       ...state,
       questionCount: state.questionCount + 1,
