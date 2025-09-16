@@ -426,7 +426,6 @@ exports.getApplicationQuiz = async (req, res) => {
 
 
 
-//-----------------------------------------
 
 exports.updateApplicationStatus = async (req, res) => {
     try {
@@ -491,8 +490,6 @@ exports.getMyCandidateApplications = async (req, res) => {
     }
 };
 
-//////////////////////////////////////////////////////////////////////
-// Enhanced applyForJob function in applicationController.js
 
 
 // Configuration - these could be environment variables

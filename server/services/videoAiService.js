@@ -12,9 +12,7 @@ const getModel = (fallback = false) => {
   return genAI.getGenerativeModel({ model: modelName });
 };
 
-/**
- * Retry function for handling temporary API failures
- */
+
 const retryWithBackoff = async (fn, maxRetries = 3, baseDelay = 1000) => {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
@@ -33,12 +31,6 @@ const retryWithBackoff = async (fn, maxRetries = 3, baseDelay = 1000) => {
   }
 };
 
-/**
- * Generates the first question for the video interview.
- * @param {Object} jobDetails - The job posting details { title, description, skills }
- * @param {string} resumeText - The candidate's resume text.
- * @returns {Promise<string>} A single, insightful opening question.
- */
 const generateInitialQuestion = async (jobDetails, resumeText) => {
   const prompt = `
     You are an expert AI technical interviewer conducting a video interview.
@@ -88,14 +80,6 @@ const generateInitialQuestion = async (jobDetails, resumeText) => {
   }
 };
 
-// ... (keep the existing getGenerativeModel and generateInitialQuestion functions)
-
-/**
- * Generates a follow-up question based on the conversation history.
- * @param {Array<Object>} transcriptHistory - An array of objects, e.g., [{ speaker: 'AI', text: '...' }, { speaker: 'Candidate', text: '...' }]
- * @param {Object} jobDetails - The job posting details { title, skills }
- * @returns {Promise<string>} A single, relevant follow-up question.
- */
 const generateFollowUpQuestion = async (transcriptHistory, jobDetails) => {
     let conversation;
     // Defensive check: If we receive a plain string, treat it as the candidate's last answer.

@@ -1,7 +1,7 @@
 const Application = require('../models/Application');
 const nodemailer = require('nodemailer');
 
-// Configure email transporter (you'll need to set up your email service)
+// need to set up your email service)
 const transporter = nodemailer.createTransport({
     service: 'gmail', // Or use SendGrid, AWS SES, etc.
     auth: {
@@ -10,18 +10,14 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-/**
- * Auto-qualification rules based on AI match score
- */
+
 const QUALIFICATION_THRESHOLDS = {
-    AUTO_SHORTLIST: 75,      // Automatically shortlist
-    MANUAL_REVIEW: 50,       // Requires manual review
-    AUTO_REJECT: 30,         // Below this, auto-reject
+    AUTO_SHORTLIST: 75,      
+    MANUAL_REVIEW: 50,      
+    AUTO_REJECT: 30,        
 };
 
-/**
- * Process application based on AI score
- */
+
 exports.processApplicationScore = async (application) => {
     try {
         const score = application.aiMatchScore;
@@ -75,9 +71,7 @@ exports.processApplicationScore = async (application) => {
     }
 };
 
-/**
- * Send email notification to candidate
- */
+
 exports.sendApplicationEmail = async (application, template) => {
     try {
         // Populate the necessary fields
@@ -186,9 +180,7 @@ exports.sendApplicationEmail = async (application, template) => {
     }
 };
 
-/**
- * Analyze skills gap between resume and job requirements
- */
+
 exports.analyzeSkillsGap = (resumeSkills, jobSkills) => {
     const resumeSkillsLower = resumeSkills.map(s => s.toLowerCase().trim());
     const jobSkillsLower = jobSkills.map(s => s.toLowerCase().trim());

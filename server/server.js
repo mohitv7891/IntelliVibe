@@ -1,4 +1,3 @@
-// server.js (CommonJS Version)
 const express = require('express');
 const http = require('http');
 const { Server } = require("socket.io");
@@ -11,8 +10,6 @@ const jobRoutes = require('./routes/JobRoutes');
 const applicationRoutes = require('./routes/applicationRoutes');
 const authRoutes = require('./routes/authRoutes');
 const reportRoutes = require('./routes/reportRoutes');
-// Real-time speech-to-text is now handled via AssemblyAI REST API endpoints.
-// If you want to support real-time streaming, implement a similar socket-to-REST relay using AssemblyAI.
 const aiRoutes = require('./routes/aiRoutes');
 const path = require('path');
 const fs = require('fs').promises;
@@ -22,12 +19,6 @@ const session = require('express-session');
 const passport = require('./config/passport');
 const googleAuthRoutes = require('./routes/googleAuthRoutes');
 require('./utils/ensureUploadsDir');// if upload folder does not exit.
-
-// Initialize Express App
-
-
-
-
 
 // -- C O N F I G U R A T I O N --
 const app = express();
@@ -50,36 +41,28 @@ app.use('/api/applications', applicationRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/auth', googleAuthRoutes);
 app.use('/api/reports', reportRoutes);
-
+app.use('/api/ai', aiRoutes);
 
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: [ 'http://localhost:5173', 'https://intellivibe.redirectme.net' ], // Your client's origin
+    origin: [ 'http://localhost:5173', 'https://intellivibe.redirectme.net' ], 
     methods: ["GET", "POST"]
   },
 });
-console.log('server.js loaded');
-app.use('/api/auth', authRoutes);
-app.use('/api/jobs', jobRoutes); // Add this
-app.use('/api/applications', applicationRoutes);
-app.use('/api/ai', aiRoutes);
+
 
 const PORT = process.env.PORT || 5001;
 
 console.log(`[Server] Starting with PORT: ${PORT}`);
 
-// In-memory store for interview sessions. In a production app, you might use Redis.
+
+//Below is all related to socketio: video/audio interview
+
+// In-memory store for interview sessions. In a production app: use Redis.
 const interviewSessions = new Map();
 
-// -- M O C K  A I  S E R V I C E S --
-// Replace these with your actual Gemini API calls
 
-/**
- * Mocks a Gemini API call to generate the first question.
- * @param {string} applicationId - The ID of the application, to fetch resume details etc.
- * @returns {Promise<string>} The first interview question.
- */
 const { generateInitialQuestion, generateFollowUpQuestion, analyzeInterviewTranscript } = require('./services/videoAiService');
 
 io.on('connection', (socket) => {

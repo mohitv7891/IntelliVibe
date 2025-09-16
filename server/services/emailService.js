@@ -338,9 +338,6 @@ const emailTemplates = {
     })
 };
 
-/**
- * Send email notification to candidate
- */
 exports.sendApplicationEmail = async (application, template, additionalData = {}) => {
     try {
         // Populate necessary fields
@@ -389,9 +386,7 @@ exports.sendApplicationEmail = async (application, template, additionalData = {}
     }
 };
 
-/**
- * Send email notification to employer
- */
+
 exports.sendEmployerNotification = async (application, notificationType, additionalData = {}) => {
     try {
         // Populate necessary fields

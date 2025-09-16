@@ -1,20 +1,9 @@
 const Job = require('../models/Job');
 
-/**
- * @desc    Create a new job
- * @route   POST /api/jobs
- * @access  Private/Employer
- * @description Handles creating a new job posting with all the new fields.
- */
 
-
-// Add this function to your server/controllers/jobController.js
 
 /**
- * @desc    Get a single job by ID
  * @route   GET /api/jobs/:id
- * @access  Private
- * @description Fetches a single job by its ID
  */
 exports.getJobById = async (req, res) => {
     try {
@@ -37,18 +26,15 @@ exports.getJobById = async (req, res) => {
 };
 
 exports.createJob = async (req, res) => {
-    // ------------------- DEBUGGING STEP -------------------
-    // Log the entire request body as soon as it arrives.
-    // This will show you exactly what the server is receiving.
+  
     console.log("Received request to create job with body:", req.body);
-    // ----------------------------------------------------
 
     const { 
         title, companyName, location, skills, salary, 
         jobType, description, expiryDate, isActive, interviewDuration 
     } = req.body;
 
-    // A quick check to ensure skills is an array, as expected by the model
+
     if (!skills || !Array.isArray(skills)) {
         return res.status(400).json({ message: "The 'skills' field must be a non-empty array." });
     }
@@ -63,20 +49,8 @@ exports.createJob = async (req, res) => {
         const createdJob = await job.save();
         res.status(201).json(createdJob);
     } catch (error) {
-        // ------------------- IMPROVED ERROR HANDLING -------------------
-        // Log the full error to the server console for your records
         console.error("Error creating job:", error);
-
-        // If it's a Mongoose validation error, send a specific, helpful message
-        if (error.name === 'ValidationError') {
-            // Extracts all validation messages into a single string
-            const messages = Object.values(error.errors).map(val => val.message).join('. ');
-            return res.status(400).json({ message: messages });
-        }
-        
-        // For any other type of error, send a generic server error message
         res.status(500).json({ message: 'A critical server error occurred.' });
-        // ---------------------------------------------------------------
     }
 };
 

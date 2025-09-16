@@ -160,21 +160,15 @@ ${resumeText}`;
     }
 };
 
-/**
- * Generates a full quiz for a specific job using Gemini, respecting difficulty.
- * @param {Object} jobDetails - The job posting details.
- * @param {Object} quizConfig - Configuration for the quiz, like difficulty.
- * @returns {Promise<Array>} Array of quiz questions.
- */
+
 const generateQuizQuestions = async (jobDetails, quizConfig) => {
   try {
 
-    // Calculate the total number of questions from the difficulty distribution
     const totalQuestions = quizConfig.difficultyDistribution.easy + 
                            quizConfig.difficultyDistribution.medium + 
                            quizConfig.difficultyDistribution.hard;
 
-    // A much more advanced prompt that asks for everything your schema needs!
+
     const prompt = `As a technical interviewer, generate a quiz with exactly ${totalQuestions} multiple-choice questions to test a candidate for the given position.
 
 The difficulty breakdown MUST be:
@@ -218,11 +212,7 @@ Description: ${jobDetails.description}`;
   }
 };
 
-/**
- * Generates a job description using Gemini based on job details.
- * @param {Object} jobDetails - The job posting details (title, companyName, skills, location, etc.)
- * @returns {Promise<string>} The generated job description.
- */
+
 const generateJobDescription = async (jobDetails) => {
   try {
     const prompt = `You are an expert HR assistant. Write a compelling, clear, and attractive job description for the following job posting. Use a professional tone, highlight the company, required skills, and location. The description should be a single, well-written paragraph of at least 100 words. Do NOT return JSON or any structured data, just the paragraph text.\n\nJob Title: ${jobDetails.title}\nCompany: ${jobDetails.companyName}\nSkills: ${jobDetails.skills}\nLocation: ${jobDetails.location}\n`;
