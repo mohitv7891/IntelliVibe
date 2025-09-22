@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,7 +9,6 @@
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
     --border: 214.3 31.8% 91.4%;
-    /* ...all your other shadcn/ui variables... */
     --radius: 0.5rem;
   }
 
@@ -22,32 +23,51 @@
   }
   
   body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+  }
+
+  h2 {
+    font-size: 2rem;
+    font-weight: 600;
+  }
+
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+
+  p {
+    line-height: 1.7;
   }
 }
 
 @layer components {
-  .glass-panel {
-    background: hsla(0,0%,100%,0.7);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
-    border: 1.5px solid hsla(0,0%,100%,0.3);
-    border-radius: var(--radius);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    transition: box-shadow 0.3s, background 0.3s;
+  .container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
-  .glass-panel:hover {
-    box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.22);
-    background: hsla(0,0%,100%,0.85);
+  
+  .btn-primary {
+    @apply inline-flex items-center px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200;
   }
-  .dark .glass-panel {
-    background: hsla(222, 47%, 11%, 0.6);
-    box-shadow: 0 8px 32px 0 rgba(0,0,0,0.28);
-    border: 1.5px solid hsla(222, 47%, 11%, 0.3);
-  }
-  .dark .glass-panel:hover {
-    background: hsla(222, 47%, 11%, 0.8);
+  
+  .btn-secondary {
+    @apply inline-flex items-center px-6 py-3 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors duration-200;
   }
 }
 

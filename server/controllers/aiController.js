@@ -13,7 +13,7 @@ const generateJobDescriptionHandler = async (req, res) => {
   }
 };
 
-exports.speechToText = async (req, res) => {
+const speechToText = async (req, res) => {
   let tempPath;
   try {
     if (!req.file) {
@@ -39,4 +39,4 @@ exports.speechToText = async (req, res) => {
   }
 };
 
-module.exports = { generateJobDescriptionHandler, speechToText: exports.speechToText }; 
+module.exports = { generateJobDescriptionHandler, speechToText }; 

@@ -25,6 +25,7 @@ exports.getJobById = async (req, res) => {
     }
 };
 
+
 exports.createJob = async (req, res) => {
   
     console.log("Received request to create job with body:", req.body);
@@ -79,7 +80,7 @@ exports.getMyJobs = async (req, res) => {
 exports.getAllJobs = async (req, res) => {
     try {
         // Only find jobs where 'isActive' is true
-        // Sort by 'createdAt: -1' to show the newest jobs first
+        // Sort by 'createdAt: -1' to show the newest jobs first:Decending order
         const jobs = await Job.find({ isActive: true }).sort({ createdAt: -1 });
         res.json(jobs);
     } catch (error) {
